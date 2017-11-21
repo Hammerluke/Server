@@ -129,7 +129,6 @@ public class DBConnection {
                 item.setItemName(resultSet.getString("itemName"));
                 item.setItemDescription(resultSet.getString("itemDescription"));
                 item.setItemPrice(resultSet.getInt("itemPrice"));
-                item.setItemImage(resultSet.getString("itemImage"));
 
                 Boolean addToOrders = true;
                 if (orders.isEmpty()) {
@@ -251,7 +250,6 @@ public class DBConnection {
                 item.setItemName(resultSet.getString("itemName"));
                 item.setItemDescription(resultSet.getString("itemDescription"));
                 item.setItemPrice(resultSet.getInt("itemPrice"));
-                item.setItemImage(resultSet.getString("itemImage"));
 
                 Boolean addToOrders = true;
                 if (orders.isEmpty()) {
