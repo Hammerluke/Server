@@ -4,9 +4,11 @@ import com.google.gson.Gson;
 import server.authentication.Secured;
 import server.controllers.StaffController;
 import server.database.DBConnection;
+import server.models.Item;
 import server.models.Order;
 import server.utility.Encryption;
 import server.utility.Globals;
+
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -72,6 +74,34 @@ public class StaffEndpoint {
                 .type("application/json")
                 //encrypt response to client
                 .entity(encryption.encryptXOR("{\"isReady\":\"" + isReady + "\"}"))
+                .build();
+    }
+
+    @Secured
+    @POST
+    @Path("/createItem")
+    public Response createItem(String jsonItem){
+        jsonItem = encryption.encryptXOR(jsonItem);
+        Item itemToBeCreated = new Gson().fromJson(jsonItem, Item.class);
+        int status = 500;
+        boolean result = staffController.createItem(itemToBeCreated.getItemName(), itemToBeCreated.getItemDescription(), itemToBeCreated.getItemPrice(), itemToBeCreated.getItemImage());
+
+        if (result) {
+            status = 200;
+            //Logging for order created
+            Globals.log.writeLog(getClass().getName(), this, "Created item with id: " + itemToBeCreated.getItemId(), 0);
+
+        } else if (!result) {
+            status = 500;
+            Globals.log.writeLog(getClass().getName(), this, "Internal Server Error 500", 1);
+
+        }
+
+        return Response
+                .status(status)
+                .type("plain/text")
+                //encrypt response to clien before sending
+                .entity(encryption.encryptXOR("{\"itemCreated\":\"" + result + "\"}"))
                 .build();
     }
 }

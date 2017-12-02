@@ -1,15 +1,15 @@
 package server.database;
 
+
+import server.config.Config;
 import server.models.Item;
 import server.models.Order;
 import server.models.User;
+import server.utility.Globals;
 
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
-
-import server.config.Config;
-import server.utility.Globals;
 
 /**
  * Class responsible for establishing connection between the database and the server
@@ -44,8 +44,9 @@ public class DBConnection {
                 e.printStackTrace();
             }
             connection = DriverManager.getConnection(("jdbc:mysql://" + config.getDatabaseHost() + ":"
-                            + config.getDatabasePort() + "/" + config.getDatabaseName()),
+                    + config.getDatabasePort() + "/" + config.getDatabaseName()),
                     config.getDatabaseUser(), config.getDatabasePassword());
+            
         } catch (SQLException e) {
             Globals.log.writeLog(getClass().getName(), this, "Error connection refused with hostname: " + config.getDatabaseHost(), 2);
             Globals.log.writeLog(getClass().getName(), this, "and databasename: " + config.getDatabaseName(), 2);
@@ -102,8 +103,8 @@ public class DBConnection {
         ArrayList<Order> orders = new ArrayList<>();
 
         try {
-            PreparedStatement getOrders = connection.prepareStatement(
-                    "SELECT Orders.order_id, Orders.orderTime, Orders.isReady, Orders.user_userid, Items.item_id, Items.ItemName, Items.itemDescription, Items.itemPrice FROM ((Order_has_Items " +
+            PreparedStatement getOrders = connection.prepareStatement
+                    ("SELECT Orders.order_id, Orders.orderTime, Orders.isReady, Orders.user_userid, Items.item_id, Items.ItemName, Items.itemDescription, Items.itemPrice FROM ((Order_has_Items " +
                             "INNER JOIN Orders ON Orders.order_id = Order_has_Items.Orders_orderId) " +
                             "INNER JOIN Items ON Items.item_id = Order_has_Items.Items_itemId)");
 
@@ -139,18 +140,18 @@ public class DBConnection {
 
                     }
                 }
-                if (addToOrders){
-                order.setItems(item);
-                orders.add(order);
+                if (addToOrders) {
+                    order.setItems(item);
+                    orders.add(order);
+                }
             }
-         }
 
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            try{
+            try {
                 resultSet.close();
-            } catch(SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
                 close();
             }
@@ -250,9 +251,9 @@ public class DBConnection {
                 Boolean addToOrders = true;
                 for (Order o : personalOrders) {
                     if (o.getOrderId() == order.getOrderId()) {
-                         o.setItems(item);
-                         addToOrders = false;
-                         break;
+                        o.setItems(item);
+                        addToOrders = false;
+                        break;
 
                     }
                 }
@@ -264,9 +265,9 @@ public class DBConnection {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            try{
+            try {
                 resultSet.close();
-            } catch(SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
                 close();
             }
@@ -385,7 +386,7 @@ public class DBConnection {
     /**
      * Method used to create token .
      *
-     * @param user Parameter specifying which user that will be assigned a token.
+     * @param user  Parameter specifying which user that will be assigned a token.
      * @param token Parameter specifying which token will be assigned to the current user.
      * @return Returns empty token string
      */
@@ -446,4 +447,38 @@ public class DBConnection {
         }
         return serverToken;
     }
+
+    public int createItem(String itemName, String itemDescription, int itemPrice, String itemImage) {
+        int rowsAffected = 0;
+        try {
+            PreparedStatement createItem = connection.prepareStatement("INSERT into Items (itemName, itemDescription, itemPrice, itemImage) VALUES (?, ?, ?, ?)");
+            createItem.setString(1, itemName);
+            createItem.setString(2, itemDescription);
+            createItem.setInt(3, itemPrice);
+            createItem.setString(4, itemImage);
+            rowsAffected = createItem.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rowsAffected;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
