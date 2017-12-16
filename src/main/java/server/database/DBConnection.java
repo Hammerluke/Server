@@ -216,14 +216,14 @@ public class DBConnection {
          * Creates ArrayList which will ultimately be the end product.
          */
         ResultSet resultSet = null;
-        ArrayList<Order> personalOrders = new ArrayList<>();
+        ArrayList<Order> orders = new ArrayList<>();
 
         try {
             PreparedStatement findOrderById = connection.prepareStatement(
-                    "SELECT Orders.order_id, Orders.orderTime, Orders.isReady, Orders.user_userid, Items.item_id, Items.ItemName, Items.itemDescription, Items.itemPrice FROM ((Order_has_Items " +
-                            "INNER JOIN Orders ON Orders.order_id = Order_has_Items.Orders_orderId) " +
-                            "INNER JOIN Items ON Items.item_id = Orders_has_Items.Items_itemId)" +
-                            "WHERE Orders.user_userid = ?");
+                    "SELECT o.order_id,o.orderTime,o.isReady,o.user_userid, i.item_id, i.ItemName, i.itemDescription, i.itemPrice FROM ((Orders o\n" +
+                            "INNER JOIN Order_has_Items oi ON o.order_id = oi.Orders_orderId)\n" +
+                            "INNER JOIN Items i ON i.item_id = oi.Items_itemId)" +
+                            "WHERE o.user_userid = ?");
 
             findOrderById.setInt(1, userId);
             resultSet = findOrderById.executeQuery();
@@ -249,30 +249,37 @@ public class DBConnection {
                 item.setItemPrice(resultSet.getInt("itemPrice"));
 
                 Boolean addToOrders = true;
-                for (Order o : personalOrders) {
-                    if (o.getOrderId() == order.getOrderId()) {
-                        o.setItems(item);
-                        addToOrders = false;
-                        break;
 
+                //Iterate through each order in the current orders array
+                for (Order o : orders) {
+                    //If the current object in the orders array equals the orderId in the resultset's current location
+                    if(o.getOrderId() == order.getOrderId()) {
+                        //Set addToOrders to false to make sure a new entry isn't made in the orders array, and that it instead gets added
+                        //to the orders i'th object item list
+                        addToOrders = false;
+                        o.setItems(item);
+                        break;
                     }
                 }
+
                 if (addToOrders) {
+                    //Add item to the order object
                     order.setItems(item);
-                    personalOrders.add(order);
+                    //Add the order to the orders object
+                    orders.add(order);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            try {
+            try{
                 resultSet.close();
-            } catch (SQLException e) {
+            } catch(SQLException e){
                 e.printStackTrace();
                 close();
             }
         }
-        return personalOrders;
+        return orders;
     }
 
     /**
