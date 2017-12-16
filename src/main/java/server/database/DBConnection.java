@@ -250,6 +250,7 @@ public class DBConnection {
 
                 Boolean addToOrders = true;
 
+                //With inspiration from Thirsmunk
                 //Iterate through each order in the current orders array
                 for (Order o : orders) {
                     //If the current object in the orders array equals the orderId in the resultset's current location
@@ -455,6 +456,7 @@ public class DBConnection {
         return serverToken;
     }
 
+    //With inspiration from Tobiaswr
     public int createItem(String itemName, String itemDescription, int itemPrice, String itemImage) {
         int rowsAffected = 0;
         try {
